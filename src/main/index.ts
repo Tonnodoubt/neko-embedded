@@ -100,8 +100,8 @@ function registerIpc(): void {
   ipcMain.handle('neko:start', async (): Promise<{ ok: boolean; error?: string }> => {
     try {
       if (!session) {
-        const config = loadConfig();
-        const store = new MemoryStore(config.persona.name);
+        const config = loadConfig(app.getAppPath());
+        const store = new MemoryStore(app.getAppPath(), config.persona.name);
         const snapshot = store.load();
         const masterName =
           (snapshot.profile.master['档案名'] as string | undefined)?.trim() || DEFAULT_MASTER_NAME;

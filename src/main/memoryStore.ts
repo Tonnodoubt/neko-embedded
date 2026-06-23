@@ -5,7 +5,6 @@
  */
 import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { app } from 'electron';
 import { atomicWriteJson } from './fileUtils';
 import { defaultYuiProfile } from '../core/memory/defaultProfile';
 import { isCharacterProfile } from '../core/memory/composeContext';
@@ -20,8 +19,8 @@ import {
 export class MemoryStore {
   private readonly characterDir: string;
 
-  constructor(characterName: string) {
-    this.characterDir = join(app.getAppPath(), 'memory', characterName);
+  constructor(baseDir: string, characterName: string) {
+    this.characterDir = join(baseDir, 'memory', characterName);
   }
 
   load(): MemorySnapshot {

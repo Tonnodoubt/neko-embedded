@@ -5,7 +5,6 @@
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { app } from 'electron';
 import type { QwenRealtimeVoiceConnectionSettings } from '../core/settings';
 
 const API_KEY_PLACEHOLDER = 'REPLACE_WITH_DASHSCOPE_API_KEY';
@@ -32,8 +31,8 @@ export interface NekoConfig {
 const DEFAULT_ASSIST_BASE_URL = 'https://dashscope.aliyuncs.com/compatible-mode/v1';
 const DEFAULT_ASSIST_MODEL = 'qwen-plus';
 
-export function loadConfig(): NekoConfig {
-  const configPath = process.env['NEKO_CONFIG']?.trim() || join(app.getAppPath(), 'config.json');
+export function loadConfig(baseDir: string): NekoConfig {
+  const configPath = process.env['NEKO_CONFIG']?.trim() || join(baseDir, 'config.json');
 
   let raw: string;
   try {
