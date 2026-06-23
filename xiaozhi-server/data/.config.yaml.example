@@ -1,0 +1,31 @@
+# N.E.K.O. 小智服务器 —— 覆盖配置（仅写差异，其余继承镜像内置默认 config.yaml）
+# 用法：复制为 .config.yaml 后填入真实 DashScope key（.config.yaml 已被 .gitignore 排除）
+#   cp data/.config.yaml.example data/.config.yaml
+
+server:
+  # docker 部署时，OTA 接口向设备播报的 ws 地址必须写成局域网地址（自动探测在 docker 里不准）
+  websocket: ws://192.168.77.48:8000/xiaozhi/v1/
+
+# 选用模块：大脑切到 Qwen，TTS 先用免费的 EdgeTTS 验证全链路
+selected_module:
+  VAD: SileroVAD
+  ASR: FunASR            # SenseVoice 本地识别（需先下载 model.pt）
+  LLM: AliLLM            # ← Qwen（DashScope OpenAI 兼容接口）
+  TTS: EdgeTTS           # ← 先验证，跑通后再换 AliyunStreamTTS 接自定义音色
+  Memory: nomem
+  Intent: function_call
+
+# Qwen 凭证与模型
+LLM:
+  AliLLM:
+    type: openai
+    base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+    model_name: qwen-plus
+    api_key: 你的DashScope_API_KEY
+    temperature: 0.7
+    max_tokens: 500
+
+# 我们的「魂」（从 N.E.K.O.-Mobile defaultLocalCharacterSystemPrompt 移植，可继续打磨中文人格）
+prompt: |
+  You are N.E.K.O. — warm, curious, direct, and close to the person you are talking with.
+  You speak naturally as yourself, keep replies concise, and never behave like a generic assistant.

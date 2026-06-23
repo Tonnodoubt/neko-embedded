@@ -1,0 +1,14 @@
+node_modules/
+out/
+dist/
+*.log
+.DS_Store
+config.json
+
+# 记忆落盘：含主人个人事实，不入库（仅根目录运行时记忆夹，勿误伤 src/core/memory 源码）
+/memory/
+
+# 小智服务器：带 key 的真实配置 + 大模型文件不入库
+xiaozhi-server/data/.config.yaml
+xiaozhi-server/models/SenseVoiceSmall/model.pt
+xiaozhi-server/tmp/
