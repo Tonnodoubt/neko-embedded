@@ -4,11 +4,12 @@
 >
 > **设备侧（硬件到货后）走「第一档」**：买现成 xiaozhi 兼容 ESP32 板，fork 固件只换唤醒词，协议保持小智那套，由我们的服务器做 xiaozhi↔Omni 翻译（回合制，不要全双工打断）。`xiaozhi-server/` 目录留作设备协议参考，不再作为大脑。
 
-嵌入式语音陪伴设备。从 `N.E.K.O.-Mobile` 抽取实时语音内核，去掉 Live2D/VRM 模型、摄像头、桌面同步、记忆/角色面板，只保留：
+嵌入式语音陪伴设备，与主项目 **N.E.K.O.TONG** 同源（实时内核移植自 `N.E.K.O.-Mobile`）。去掉桌面端的 Live2D/VRM 模型、摄像头、桌面同步、角色面板，保留四样：
 
-- **语音对话**：Qwen Omni 云端实时语音（说话进 → 说话出）
-- **内置人格**：单一固定角色（`config.json` 的 `systemPrompt`）
-- **表情图片**：按回复情绪全屏切换预设 PNG（无 3D 模型）
+- **语音对话**：Qwen-Omni 云端实时语音（说话进 → 说话出）
+- **内置人格**：YUI 灵魂，框架 prompt 由主项目 `prompts_chara` 渲染（`config.json` 的 `persona.systemPrompt`）
+- **记忆**：精简移植主项目——会话开始注入身份/事实，退出前抽事实 + 压缩近期对话并落盘（`memory/{角色}/`）。身份（猫娘/本喵）走记忆通道承载，不污染框架 prompt，与主项目一致
+- **表情图片**：按回复情绪全屏切换预设 PNG（无 3D 模型，规划中）
 
 ## 架构
 
@@ -24,24 +25,33 @@
 
 ```
 src/
-├── core/              # 平台无关内核，从 mobile 移植
+├── core/              # 平台无关、纯函数优先、带单测的内核
 │   ├── lib/           # base64 / eventId / redact / websocket
 │   ├── runtime/       # QwenRealtimeVoiceClient + 回合/回声门控/断句
 │   ├── emotion/       # 文本 → 情绪推断（驱动切图）
+│   ├── memory/        # 记忆：注入文本组装 / 事实抽取解析 / 去重（纯函数）
 │   └── settings.ts    # 实时语音连接配置类型
-├── main/              # Electron 主进程
-├── preload/           # 预加载桥
-└── renderer/          # 表情显示 + 音频 I/O
+├── main/              # Electron 主进程：config / voiceSession / memoryStore / memoryLearner / assistClient
+├── preload/           # 预加载桥（受限 IPC）
+└── renderer/          # 表情显示 + audio/（MicCapture 采集 / PcmPlayer 播放 / pcm DSP）
 ```
+
+## 成品形态
+
+YUI 的大脑是云端 Qwen-Omni，需一台常开机器替设备保管 key、跑记忆、连大脑。两种部署：
+
+- **电脑全包（现在 / 也可单独成品）**：Electron 应用一台电脑既当身体（窗口麦克风/喇叭/表情）又当大脑（主进程 Omni + 记忆）。
+- **设备 + 服务器（硬件到货后）**：ESP32 当身体（收音/放音/表情/唤醒），主进程那套抽成独立服务器当大脑。`src/core` 两边复用，电脑上调好的人格/音色/记忆原样搬，不返工。
 
 ## 开发
 
 ```bash
 npm install
-cp config.example.json config.json   # 填入 DashScope API key
-npm test          # 内核单测（27 个，node 环境）
-npm run dev       # 启动 Electron 窗口
-npm run build     # 产出 out/
+cp config.example.json config.json   # 填入 DashScope API key（assist 段可选，缺省复用同一 key）
+npm run type-check                    # tsc 类型检查
+npm test                             # 单测（node 环境，含 DSP/记忆/协议）
+npm run dev                          # 启动 Electron 窗口（点窗口授权麦克风后说话）
+npm run build                        # 产出 out/
 ```
 
 ## 目标硬件
