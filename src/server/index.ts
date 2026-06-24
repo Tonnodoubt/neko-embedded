@@ -4,7 +4,7 @@
  * 音频暂用 PCM 直通 codec，待接真实 Opus 编解码后即可对接真小智设备 / py-xiaozhi。
  */
 import { startXiaozhiServer } from './xiaozhiServer';
-import { PcmPassthroughCodec } from '../core/xiaozhi/audioCodec';
+import { OpusCodec } from './opusCodec';
 import { OmniVoiceBrain } from './omniBrain';
 import { loadConfig } from '../main/config';
 import { MemoryStore } from '../main/memoryStore';
@@ -27,9 +27,9 @@ function buildBrain(): OmniVoiceBrain {
 
 startXiaozhiServer({
   port,
-  codecFactory: () => new PcmPassthroughCodec(),
+  codecFactory: () => new OpusCodec(),
   brainFactory: buildBrain,
 });
 
 // eslint-disable-next-line no-console
-console.log(`[neko-server] 小智协议服务器已启动：ws://0.0.0.0:${port}/（音频 codec：PCM 直通，待换 Opus）`);
+console.log(`[neko-server] 小智协议服务器已启动：ws://0.0.0.0:${port}/（Opus 编解码）`);

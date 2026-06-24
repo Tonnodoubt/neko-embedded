@@ -100,7 +100,11 @@ export class XiaozhiConnection {
         transport.sendText(buildLlm(sessionId, emotion, text));
         transport.sendText(buildTtsSentenceStart(sessionId, text));
       },
-      onAudio: (pcm) => transport.sendBinary(codec.encode(pcm)),
+      onAudio: (pcm) => {
+        for (const frame of codec.encode(pcm)) {
+          transport.sendBinary(frame);
+        }
+      },
       onResponseDone: () => transport.sendText(buildTtsStop(sessionId)),
     };
   }

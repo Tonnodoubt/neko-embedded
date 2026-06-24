@@ -67,9 +67,11 @@ npm run build                        # 产出 out/
 - [x] Phase M 记忆（移植主项目精简版，承载身份+连续性）
   - [x] 片 A 读侧：记忆存储 + 会话开始注入（`src/core/memory/` 纯函数已测 / `src/main/memoryStore.ts` 落盘 / YUI 角色卡走记忆通道注入）
   - [x] 片 B 写侧：退出前用 assist 模型（默认 qwen-plus，可选覆盖）抽事实 + 压缩近期记忆并落盘；事实去重/排序/截断已测，真实端到端抽取已验证
-- [~] 硬件路线（设备配合）：协议研究 + 翻译层（详见 [`docs/`](docs/)）
-  - [x] 啃完小智 WS 协议、定翻译层设计；`src/server/` 骨架（小智 WS 服务 + 协议/连接状态机已测，音频/大脑留接口缝）
-  - [ ] 接 Opus 编解码（唯一新依赖，待定库）+ 真 Omni 大脑适配器；py-xiaozhi 假设备验证
+- [~] 硬件路线（设备配合）：翻译层服务器（详见 [`docs/`](docs/)）
+  - [x] 啃完小智 WS 协议、定翻译层设计；`src/server/` 骨架（协议/连接状态机已测）
+  - [x] 接真 Omni 大脑（`OmniVoiceBrain` + 记忆注入）；config/memory 去 electron 化，主进程与服务器共用
+  - [x] 接 Opus 编解码（`opusscript`）+ 运行工具（`tsx`，`npm run server` 可启动）
+  - [ ] py-xiaozhi 假设备 / 真 ESP32 端到端验证；记忆写侧搬到服务器
 - [ ] Phase 4 表情 UI（情绪 → PNG）
 - [ ] Phase 5 人格固化
 - [ ] Phase 6 上板部署（kiosk / 自启 / USB 音频 / 回声消除）
