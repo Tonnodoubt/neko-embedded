@@ -23,38 +23,44 @@ npm run server          # 默认 ws://0.0.0.0:8000/，可 NEKO_SERVER_PORT=8123 
 
 记下本机局域网 IP（`ipconfig getifaddr en0`）或用 `localhost`。
 
-### 2. 装 py-xiaozhi
+### 2. 装 py-xiaozhi（已在本机完成，记录步骤备查）
 
-按其仓库 README（推荐 `uv`）。装好后**先随便跑一次让它生成配置文件**，再退出：
-
-```bash
-python main.py --protocol websocket    # 看日志里打印的「配置文件: <路径>」，然后退出
-```
-
-### 3. 改 py-xiaozhi 配置，指向我们的服务器
-
-编辑上一步日志里的 `config.json`，设：
-
-```json
-{
-  "SYSTEM_OPTIONS": {
-    "NETWORK": {
-      "WEBSOCKET_URL": "ws://localhost:8123/",
-      "WEBSOCKET_ACCESS_TOKEN": "test"
-    }
-  }
-}
-```
-
-（其余字段保持不动；路径无所谓，我们服务器不挑 path。）
-
-### 4. 跳过激活、连我们的服务器对话
+克隆在 `../py-xiaozhi`。环境用 `uv`，macOS 还需两个系统库：
 
 ```bash
-python main.py --protocol websocket --skip-activation
+brew install portaudio opus            # sounddevice / opuslib 的系统依赖
+cd ../py-xiaozhi
+uv sync --python 3.12                  # 仅 CLI 依赖；要 GUI 加 --extra gui（PySide6，较大）
 ```
 
-GUI 起来后，对电脑说话。预期：你说完停顿 → 服务器日志/客户端字幕出现转写 → YUI 用 Chelsie 音色回话、带情绪表情。
+**macOS 关键坑**：opuslib 用 `find_library('opus')` 找不到 Homebrew 的库，运行时必须带
+`DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib`（见第 4 步），否则报 “Could not find Opus library”。
+
+### 3. 配置指向我们的服务器（已设好）
+
+配置文件在 `~/Library/Application Support/py-xiaozhi/config/config.json`，已设：
+`SYSTEM_OPTIONS.NETWORK.WEBSOCKET_URL = ws://localhost:8000/`、`WEBSOCKET_ACCESS_TOKEN = test`。
+重设命令（如需改端口）：
+
+```bash
+cd ../py-xiaozhi
+DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib uv run python -c "
+from src.utils.config_manager import ConfigManager
+cm = ConfigManager.get_instance()
+cm.update_config('SYSTEM_OPTIONS.NETWORK.WEBSOCKET_URL', 'ws://localhost:8000/')
+cm.update_config('SYSTEM_OPTIONS.NETWORK.WEBSOCKET_ACCESS_TOKEN', 'test')"
+```
+
+### 4. 跳过激活、CLI 模式连服务器对话
+
+```bash
+cd ../py-xiaozhi
+DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib uv run python main.py --mode cli --protocol websocket --skip-activation
+```
+
+到 `状态: 待命  输入:` 后，**输入 `r` 回车开始对话**（连服务器+开麦），对电脑说话，再 `r` 停。
+（CLI 命令：`r` 开始/停止、`x` 打断、`q` 退出、`h` 帮助。首次开麦 macOS 会弹麦克风授权。）
+预期：转写出现 → YUI 用 Chelsie 音色回话。GUI 模式则需 `--extra gui` 且 `--mode gui`。
 
 ## 排障对照
 
